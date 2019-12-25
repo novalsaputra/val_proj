@@ -1,0 +1,35 @@
+---
+title: "bayesian linear regression"
+output: html_notebook
+---
+
+# Data Preprocessing
+the data set used is about medical cost personal
+the following are the variabels contained in the data
+
+* age: age of primary beneficiary
+
+* sex: insurance contractor gender, female, male
+
+* bmi: Body mass index, providing an understanding of body, weights that are relatively high or low relative to height, objective index of body weight (kg / m ^ 2) using the ratio of height to weight, ideally 18.5 to 24.9
+
+* children: Number of children covered by health insurance / Number of dependents
+
+* smoker: Smoking
+
+* region: the beneficiary's residential area in the US, northeast, southeast, southwest, northwest.
+
+* charges: Individual medical costs billed by health insurance
+
+importing data
+```{r}
+data <-  read.csv("https://github.com/novalsaputra/val_proj/raw/master/bayesian-linear-regression-in-r/data/insurance.csv",head=TRUE)
+str(data)
+```
+
+importing packages 
+```{r}
+library(PerformanceAnalytics)
+library(ggplot2)
+```
+
