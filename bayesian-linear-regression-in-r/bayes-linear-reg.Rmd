@@ -23,18 +23,67 @@ the following are the variabels contained in the data
 
 importing data
 ```{r}
-data <-  read.csv("https://github.com/novalsaputra/val_proj/raw/master/bayesian-linear-regression-in-r/data/insurance.csv",head=TRUE)
-str(data)
+insurance <-  read.csv("https://github.com/novalsaputra/val_proj/raw/master/bayesian-linear-regression-in-r/data/insurance.csv",head=TRUE)
+str(insurance)
 ```
+```{r}
+summary(insurance)
+```
+
 
 importing packages 
 ```{r}
-library(PerformanceAnalytics)
-library(ggplot2)
+#install.packages('gridExtra')
+#install.packages("tidyverse")
+library(tidyverse)
+library(gridExtra) # to plot multiple ggplots aside
+library(car) # package for regression diagnostics
 ```
 
 ```{r}
-plot((data$charges))
+plot.age <- ggplot(insurance, aes(x = age, y = charges)) +
+ geom_point()
+
+plot.bmi <- ggplot(insurance, aes(x = bmi, y = charges)) +
+ geom_point()
+
+grid.arrange(plot.age, plot.bmi, ncol=2)
 ```
 
+```{r}
+plot.sex <- ggplot(insurance, aes(x = sex, y = charges)) +
+ geom_boxplot()
+
+plot.smoker <- ggplot(insurance, aes(x = smoker, y = charges)) +
+ geom_boxplot()
+
+plot.child <- ggplot(insurance, aes(x = as.factor(children), y = charges)) +
+ geom_boxplot()
+
+plot.region <- ggplot(insurance, aes(x = region, y = charges)) +
+ geom_boxplot()
+
+grid.arrange(plot.sex, plot.smoker, plot.child, plot.region, ncol=2, nrow=2)
+
+```
+
+
+# Ordinary Regression
+
+```{r}
+mod <- lm(charges ~ . ,data=insurance)
+summary(mod)
+```
+
+```{r}
+step(mod)
+```
+
+final model used
+```{r}
+mod2 <- lm(charges ~ age + bmi + children + smoker + region + smoker*bmi)
+summary(mod2)
+```
+
+# Inference Parameter linear Regression with Bayesian Approach
 
