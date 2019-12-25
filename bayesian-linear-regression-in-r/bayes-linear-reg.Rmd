@@ -33,3 +33,8 @@ library(PerformanceAnalytics)
 library(ggplot2)
 ```
 
+```{r}
+plot((data$charges))
+```
+
+
