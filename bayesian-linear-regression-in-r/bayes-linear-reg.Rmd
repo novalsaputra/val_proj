@@ -33,11 +33,8 @@ summary(insurance)
 
 importing packages 
 ```{r}
-#install.packages('gridExtra')
-#install.packages("tidyverse")
-library(tidyverse)
-library(gridExtra) # to plot multiple ggplots aside
-library(car) # package for regression diagnostics
+library(ggplot2)
+library(gridExtra)
 ```
 
 ```{r}
@@ -48,6 +45,30 @@ plot.bmi <- ggplot(insurance, aes(x = bmi, y = charges)) +
  geom_point()
 
 grid.arrange(plot.age, plot.bmi, ncol=2)
+```
+```{r}
+age1 <- ggplot(insurance, aes(x = age, y = charges,col=sex)) + geom_point()
+age2 <- ggplot(insurance, aes(x = age, y = charges,col=bmi)) + geom_point()
+age3 <- ggplot(insurance, aes(x = age, y = charges,col=children)) + geom_point()
+age4 <- ggplot(insurance, aes(x = age, y = charges,col=smoker)) + geom_point()
+age5 <- ggplot(insurance, aes(x = age, y = charges,col=region)) + geom_point()
+grid.arrange(age1,age2,age3,age4,age5,ncol=2)
+```
+
+```{r}
+ggplot(insurance, aes(x = age, y = charges,col=smoker)) + geom_point()
+```
+```{r}
+bmi1 <- ggplot(insurance, aes(x = bmi, y = charges,col=sex)) + geom_point()
+bmi2 <- ggplot(insurance, aes(x = bmi, y = charges,col=age)) + geom_point()
+bmi3 <- ggplot(insurance, aes(x = bmi, y = charges,col=children)) + geom_point()
+bmi4 <- ggplot(insurance, aes(x = bmi, y = charges,col=smoker)) + geom_point()
+bmi5 <- ggplot(insurance, aes(x = bmi, y = charges,col=region)) + geom_point()
+grid.arrange(bmi1,bmi2,bmi3,bmi4,bmi5,ncol=2)
+```
+
+```{r}
+ggplot(insurance,aes(x=bmi,y=charges,col=smoker)) + geom_point()
 ```
 
 ```{r}
@@ -76,14 +97,167 @@ summary(mod)
 ```
 
 ```{r}
-step(mod)
+#m <- lm(charges~age*bmi*children*smoker*region*smoker*bmi)
+#sm <- step(m)
+#summary(sm)
+#terlalalu komplit
 ```
 
 final model used
 ```{r}
-mod2 <- lm(charges ~ age + bmi + children + smoker + region + smoker*bmi)
+mod2 <- lm(charges ~ age + bmi + children + smoker + region + smoker*bmi, data=insurance)
 summary(mod2)
 ```
+# OLS with matrix
+
+```{r}
+#variabel definition
+attach(insurance)
+y <- charges
+x1 <- age
+x2 <- sex
+x3 <- bmi
+x4 <- children
+x5 <- smoker
+x6 <- region
+
+#dummy for x6
+x6a <- as.integer(x6a)
+x6b <- as.integer(x6b)
+x6c <- as.integer(x6c)
+
+x1x5 <- age*as.numeric(smoker)
+x3x5 <- bmi*as.numeric(smoker)
+```
+
+```{r}
+mod <- lm(y ~ x1+x2+x3+x4+x5+x6a+x6b+x6c+x1x5+x3x5)
+summary(mod)
+```
+
+
+```{r}
+mod1 <- lm(y ~ x1+x2+x3+x4+x5+x6+x1x5 + x3x5)
+summary(mod1)
+```
+
 
 # Inference Parameter linear Regression with Bayesian Approach
+
+```{r}
+mod2 <- lm(y ~ x1+ x3 + x4 +x5 +x6 +x3x5)
+summary(mod2)
+```
+```{r}
+x6 <- region
+x6a <- as.integer(rep(0,length(x6)))
+x6b <- as.integer(rep(0,length(x6)))
+x6c <- as.integer(rep(0,length(x6)))
+
+for (i in 1:length(x6)){
+  if (x6[i]=="northwest"){
+    x6a[i] = 1
+  }
+  else if (x6[i]=="southeast"){
+    x6b[i] = 1
+  }
+  else if (x6[i]=="southwest"){
+    x6c[i] =1
+  }
+  else {
+    x6a[i] = 0
+    x6b[i] = 0
+    x6c[i] = 0
+  }
+}
+
+table(x6a)
+table(x6b)
+table(x6c)
+```
+
+```{r}
+X <- as.matrix(cbind(rep(1,length(y)),x1,x3,x4,x5,x6a,x6b,x6c,x3x5))
+dim(X)
+```
+
+
+
+```{r}
+n <- dim(X)[1]
+p <- dim(X)[2]
+```
+
+
+```{r}
+#prior parameter
+nu0 <- 1
+s20 <- summary(mod2)$sigma^2 #prior variation from ols
+g <- n
+S <- 1000
+```
+
+```{r}
+#posterior calclation
+Hg <- (g/(g+1))*X%*%solve(t(X)%*%X)%*%t(X)
+SSRg<- t(y)%*%(diag(1,nrow=n)-Hg)%*%y
+
+Vbeta <- g*solve(t(X)%*%X)/(g+1)
+Ebeta <- Vbeta %*% t(X) %*% y
+
+```
+
+
+```{r}
+#monte Carlo
+
+n<-dim(X)[1]
+p<-dim(X)[2]
+Hg<-(g/(g+1))*X%*%solve(t(X)%*%X)%*%t(X)
+SSRg<- t(y)%*%(diag(1,nrow=n)-Hg)%*%y
+s2<-1/rgamma(S,(nu0+n)/2,(nu0*s20+SSRg/2)) #gamma sample
+Vb<-g*solve(t(X)%*%X)/(g+1)
+Eb<-Vb%*%t(X)%*%y
+E<- matrix(rnorm(S*p,0,sqrt(s2)),S,p) #sample beta
+```
+
+```{r}
+beta<-t(t(E%*%chol(Vb))+c(Eb))
+```
+
+```{r}
+b <- colSums(beta)/S
+
+b
+```
+
+```{r}
+ycap <- X%*%c(b)
+bys <- data.frame(y,ycap)
+ggplot(bys,aes(y,abs(y-ycap))) +
+        geom_point()+
+        geom_smooth()
+```
+
+```{r}
+ggplot(bys) + geom_smooth(aes(x=y,y=ycap))
+```
+
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
+signif = apply(beta, MARGIN = 2, FUN = quantile, probs = c(0.025, 0.5, 0.975)) %>%
+  apply(MARGIN = 2, FUN = function(y) !(y[1] < 0 && 0 < y[3]))
+
+beta_df = as.data.frame(beta) %>%
+  gather(key = 'variable', val = 'coefficient') %>%
+  mutate(signif = signif[variable])
+
+ggplot(beta_df, aes(x = variable, y = coefficient, color = signif)) +
+  stat_summary(fun.y = mean, fun.ymin = function(y) quantile(y, probs = c(0.025)), fun.ymax = function(y) quantile(y, probs = c(0.975))) +
+  geom_hline(yintercept = 0, lty = 2)
+```
 
