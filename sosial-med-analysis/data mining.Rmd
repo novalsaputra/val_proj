@@ -132,10 +132,35 @@ remaja_cluster <- kmeans(minat_z,5)
 remaja_cluster$size
 ```
 
+karena terdapat 5 pengclusteran yang mempresentasikan minat dari remaja, maka kita akan mengkluster minat terebut menjadi 5, yaitu
+
+memasukkan hasil kecluster ke bariabel baru pada data
+
+```{r}
+remaja$cluster <- remaja_cluster$cluster
+```
+
+membuat model regresi
+
+```{r}
+rl <- lm(cluster ~ female + no_gender + age + friends, data=remaja)
+summary(rl)
+```
+
+svm
+```{r}
+sv <- svm(cluster ~ female + no_gender + age + friends, data=remaja)
+```
+```{r}
+predictedY <- predict(sv,remaja[c("female","no_gender","age","friends")])
+plot(remaja$cluster,predictedY)
+
+```
+
+
 Mereduksi Dimensi
 ```{r}
-library(caret)
-pca <- prcomp(remaja[,4:42],scale. = TRUE)
-summary(pca)
+#pca <- prcomp(remaja[,4:42],scale. = TRUE)
+#summary(pca)
 ```
 
