@@ -1,0 +1,141 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+remaja <- read.csv("https://github.com/stedy/Machine-Learning-with-R-datasets/raw/master/snsdata.csv")
+str(remaja)
+```
+
+
+
+# Eksploratory Data Analysis
+
+melihat banyaknya missing value
+
+```{r}
+colSums(is.na(remaja))
+```
+
+dari hasil tersebut terlihat bahwa banyak data yang missing untuk variabel gender dan age.
+
+```{r}
+table(remaja$gender, useNA = "ifany")
+```
+```{r}
+library(tidyverse)
+ggplot(remaja %>%summarise(Jumlah=n()))+
+         geom_bar(aes(gender,Jumlah),stat="identity",fill="coral1") +
+         geom_label(aes(gender,Jumlah,label=Jumlah),hjust=0.5)
+```
+
+
+laki-laki lebih sedikit dari pada wanita, maka dapat diduga bahwa gender yang missing kebanyakan berasal dari laki-laki
+
+```{r}
+summary(remaja$age)
+```
+tidak mungkin umur pelajar sma 3 tahun dan 106 tahun, maka kita anggap data ini sebagai outlier dan membuangnya.
+
+```{r}
+remaja$age <- ifelse(remaja$age >= 13 & remaja$age < 20, remaja$age,NA)
+```
+
+## menangni missing value
+### missing value pada gender
+kita bisa menggunakan dummy coding untuk mengatasi missing value pada tada kategorik.
+```{r}
+remaja$female <- ifelse(remaja$gender == "F" & !is.na(remaja$gender),1,0)
+remaja$no_gender <- ifelse(is.na(remaja$gender),1,0)
+```
+
+
+```{r}
+table(remaja$gender, useNA = "ifany")
+```
+
+
+```{r}
+table(remaja$female,useNA = "ifany")
+```
+
+```{r}
+table(remaja$no_gender,useNA = "ifany")
+```
+
+
+  
+
+
+
+
+#imputasi missing value
+```{r}
+mean(remaja$age, na.rm=TRUE)
+```
+
+```{r}
+aggregate(data=remaja, age~gradyear, mean,na.rm=TRUE)
+```
+
+
+```{r}
+rata_age <- ave(remaja$age, remaja$gradyear, 
+               FUN = function(x) mean(x,na.rm=TRUE))
+```
+
+```{r}
+remaja$age <- ifelse(is.na(remaja$age), rata_age, remaja$age)
+```
+
+```{r}
+summary(remaja$age)
+```
+
+# Model Clustering
+
+```{r}
+dim(remaja)
+```
+
+subse dari minat
+```{r}
+minat <- remaja[5:40]
+colnames(minat)
+```
+
+staardized
+```{r}
+minat_z <- as.data.frame(lapply(minat,scale))
+```
+
+```{r}
+# mencari banyaknya kluster yang optimal dengan scree plot
+wss <- 0
+for (i in 1:7){
+  km <- kmeans(minat_z,centers = i)
+  wss[i] <- km$tot.withinss
+}
+
+plot(1:7,wss,type="b",
+     xlab="banyaknya kluster",
+     ylab = "jumlah within sum square")
+```
+
+```{r}
+remaja_cluster <- kmeans(minat_z,5)
+```
+
+```{r}
+remaja_cluster$size
+```
+
+Mereduksi Dimensi
+```{r}
+library(caret)
+pca <- prcomp(remaja[,4:42],scale. = TRUE)
+summary(pca)
+```
+

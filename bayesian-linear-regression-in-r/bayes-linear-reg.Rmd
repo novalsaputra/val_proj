@@ -111,44 +111,6 @@ summary(mod2)
 # OLS with matrix
 
 ```{r}
-#variabel definition
-attach(insurance)
-y <- charges
-x1 <- age
-x2 <- sex
-x3 <- bmi
-x4 <- children
-x5 <- smoker
-x6 <- region
-
-#dummy for x6
-x6a <- as.integer(x6a)
-x6b <- as.integer(x6b)
-x6c <- as.integer(x6c)
-
-x1x5 <- age*as.numeric(smoker)
-x3x5 <- bmi*as.numeric(smoker)
-```
-
-```{r}
-mod <- lm(y ~ x1+x2+x3+x4+x5+x6a+x6b+x6c+x1x5+x3x5)
-summary(mod)
-```
-
-
-```{r}
-mod1 <- lm(y ~ x1+x2+x3+x4+x5+x6+x1x5 + x3x5)
-summary(mod1)
-```
-
-
-# Inference Parameter linear Regression with Bayesian Approach
-
-```{r}
-mod2 <- lm(y ~ x1+ x3 + x4 +x5 +x6 +x3x5)
-summary(mod2)
-```
-```{r}
 x6 <- region
 x6a <- as.integer(rep(0,length(x6)))
 x6b <- as.integer(rep(0,length(x6)))
@@ -175,6 +137,42 @@ table(x6a)
 table(x6b)
 table(x6c)
 ```
+
+```{r}
+#variabel definition
+attach(insurance)
+y <- charges
+x1 <- age
+x2 <- sex
+x3 <- bmi
+x4 <- children
+x5 <- smoker
+x6 <- region
+
+
+x1x5 <- age*as.numeric(smoker)
+x3x5 <- bmi*as.numeric(smoker)
+```
+
+```{r}
+mod <- lm(y ~ x1+x2+x3+x4+x5+x6a+x6b+x6c+x1x5+x3x5)
+summary(mod)
+```
+
+
+```{r}
+mod1 <- lm(y ~ x1+x2+x3+x4+x5+x6+x1x5 + x3x5)
+summary(mod1)
+```
+
+
+# Inference Parameter linear Regression with Bayesian Approach
+
+```{r}
+mod2 <- lm(y ~ x1+ x3 + x4 +x5 +x6 +x3x5)
+summary(mod2)
+```
+
 
 ```{r}
 X <- as.matrix(cbind(rep(1,length(y)),x1,x3,x4,x5,x6a,x6b,x6c,x3x5))
@@ -230,6 +228,39 @@ b <- colSums(beta)/S
 
 b
 ```
+```{r}
+beta_df <- as.data.frame(beta)
+sapply(beta_df,var)
+```
+
+```{r}
+variasi_beta <- 
+for( i in 2:dim(beta_df)[2]){
+  
+}
+```
+
+```{r}
+colnames(beta_df)
+```
+
+
+```{r}
+ggplot(beta_df,aes(x=x3x5)) +
+  geom_histogram(aes(y=..density..),
+                 binwidth = 7,
+                 colour="black",fill="white") +
+  geom_density(alpha=.2, fill="#FF6666")
+```
+
+```{r}
+ggplot(beta_df,aes(x=x5)) +
+  geom_histogram(aes(y=..density..),
+                 binwidth = 100,
+                 colour="black",fill="white") +
+  geom_density(alpha=.2, fill="#FF6666")
+```
+
 
 ```{r}
 ycap <- X%*%c(b)
@@ -259,5 +290,9 @@ beta_df = as.data.frame(beta) %>%
 ggplot(beta_df, aes(x = variable, y = coefficient, color = signif)) +
   stat_summary(fun.y = mean, fun.ymin = function(y) quantile(y, probs = c(0.025)), fun.ymax = function(y) quantile(y, probs = c(0.975))) +
   geom_hline(yintercept = 0, lty = 2)
+```
+
+```{r}
+ggplot(a)
 ```
 
