@@ -157,10 +157,38 @@ plot(remaja$cluster,predictedY)
 
 ```
 
-
-Mereduksi Dimensi
 ```{r}
-#pca <- prcomp(remaja[,4:42],scale. = TRUE)
-#summary(pca)
+ggplot(remaja,aes(cluster))+
+  geom_bar(aes(fill=as.factor(cluster)))+
+  geom_text(stat='count',aes(label=scales::percent(..count../sum(..count..))),
+            vjust=-1)
+```
+
+```{r}
+ggplot(remaja,aes(x=cluster,fill=factor(female)))+
+  geom_bar(position = 'dodge')
+```
+
+
+
+Analisi lanjutan
+```{r}
+ggplot(remaja,aes(x=factor(cluster),y=age,fill=factor(cluster))) +
+  geom_boxplot()
+```
+
+```{r}
+ggplot(remaja,aes(x=factor(cluster),y=friends))+
+  geom_boxplot()
+```
+
+
+```{r}
+ggplot(remaja,aes(x=as.factor(cluster),y=friends)) +
+  geom_boxplot()
+```
+
+```{r}
+table(remaja$cluster,remaja$female)
 ```
 
