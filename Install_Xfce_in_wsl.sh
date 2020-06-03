@@ -1,5 +1,5 @@
 sudo apt update
-sudo dpkg --config -a
+sudo dpkg --configure -a
 sudo apt install xfce4
 sudo apt install xrdp
 
